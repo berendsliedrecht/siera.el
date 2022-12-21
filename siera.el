@@ -8,17 +8,17 @@
         out command-output)
   (message out))
 
-;; DIT MOET EEN MAKRO ZIJN
-(defun siera--connection (&optional subcommand)
-  "Create a connection with siera"
-  (setq foo (if (not (null subcommand)) subcommand (read-string "Enter subcommand: ")))
-  (siera--command "connection" foo))
+(defmacro siera! (&rest names)
+  (macroexp-progn
+   (mapcar (lambda (name)
+             `(defun ,(intern (format "siera--%s" name)) (&optional maybe-subcommand)
+                ,(format "Siera wrapper for the %s subcommand" name)
+                (setq subcommand
+                      (if (not (null maybe-subcommand))
+                          maybe-subcommand
+                        (read-string "Enter subcommand: ")))
+                (siera--command ,(format "%s" name) subcommand))) names)))
 
-;; example
-;; (meta-siera! connection credential)
-;; (siera! :connnection
-;;         invite
-;;         list
-;;         create)
-
-(siera--connection "invite")
+(siera! proof
+        connection
+        credential)
