@@ -3,22 +3,18 @@
   (setq siera (executable-find "siera"))
   (if (not siera)
       (error "siera is not installed"))
-  (setq formatted-command (format "%s %s 2> /dev/null" siera (string-join command " "))
+  (setq formatted-command (format "%s %s 2> /dev/null" siera (mapconcat 'identity command " "))
         command-output (shell-command-to-string formatted-command)
         out command-output)
   (message out))
 
-(defmacro siera! (&rest names)
+(defmacro siera! (&rest commands)
   (macroexp-progn
-   (mapcar (lambda (name)
-             `(defun ,(intern (format "siera--%s" name)) (&optional maybe-subcommand)
-                ,(format "Siera wrapper for the %s subcommand" name)
-                (setq subcommand
-                      (if (not (null maybe-subcommand))
-                          maybe-subcommand
-                        (read-string "Enter subcommand: ")))
-                (siera--command ,(format "%s" name) subcommand))) names)))
+   (mapcar (lambda (command)
+             `(defun ,(intern (format "siera--%s" (string-join command "-"))) (&optional args)
+                ,(format "Siera wrapper for the %s subcommand" command)
+                (siera--command ,(string-join command " ") args))
+             ) commands)))
 
-(siera! proof
-        connection
-        credential)
+(siera! ("connection" "invite"))
+(siera--connection-invite)
