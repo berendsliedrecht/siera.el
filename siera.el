@@ -25,9 +25,13 @@
   (dolist (command commands)
     (setq subcommand (plist-get plist command))
     (when (boundp 'subcommand)
-        (message subcommand))))
+        (message (format "%s" subcommand)))))
 
-(sample-siera '(:connections "invite"
-                :proofs "foo"
-                :credentials "yes"
-                :cheese "lol"))
+(sample-siera '(:connections
+                invite
+                :proofs
+                foo
+                :credentials
+                yes
+                :cheese
+                lol))
