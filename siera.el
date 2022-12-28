@@ -2,7 +2,11 @@
   (or delim (setq delim " "))
   (string-join args " "))
 
-(defun siera--command (&rest command)
+(mapatoms (lambda (symbol)
+            (if (string-prefix-p "siera-" (symbol-name symbol))
+                (unintern symbol))))
+
+(defun siera--command (command)
   "Wrapper for siera"
   (setq siera (executable-find "siera"))
   (if (not siera)
@@ -12,26 +16,26 @@
         out command-output)
   (message out))
 
-(defmacro siera! (&rest commands)
-  (macroexp-progn
-   (mapcar (lambda (command)
-             `(defun ,(intern (format "siera--%s" (string-join-with-delim command "-"))) (&optional args)
-                ,(format "Siera wrapper for the %s subcommand" command)
-                (siera--command ,(string-join-with-delim command) args))
-             ) commands)))
+(defun siera-plist! (plist)
+  (dolist (command (list :connection :proof :credential))
+    (setq subcommands (plist-get plist command))
+    (setq command (substring (format "%s" command) 1))
+    (when (boundp 'subcommands)
+      (or (listp subcommands) (setq subcommands (list subcommands)))
+      (dolist (subcommand subcommands)
+        (setq subcommand (format "%s" subcommand))
+        `(defun (intern (format "siera--%s-%s" command subcommand)) ()
+             ,(format "Siera subcommand ey: %s - %s" command subcommand)
+             (message "kaas")
+             ;;(siera--command (command subcommand))
+             )))))
 
-(defun sample-siera (plist)
-  (setq commands (list :connections :proofs :credentials))
-  (dolist (command commands)
-    (setq subcommand (plist-get plist command))
-    (when (boundp 'subcommand)
-        (message (format "%s" subcommand)))))
+(siera-plist! '(:connection
+               (invite list)
+               :proof
+               foo
+               :credential
+               yes
+               ))
 
-(sample-siera '(:connections
-                invite
-                :proofs
-                foo
-                :credentials
-                yes
-                :cheese
-                lol))
+(siera--connection-invite)
