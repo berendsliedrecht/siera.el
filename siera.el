@@ -1,5 +1,5 @@
 (defun string-join-with-delim (args &optional delim)
-  (or delim (setq b " "))
+  (or delim (setq delim " "))
   (string-join args " "))
 
 (defun siera--command (&rest command)
