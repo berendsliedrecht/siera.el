@@ -1,7 +1,3 @@
-(defun string-join-with-delim (args &optional delim)
-  (or delim (setq delim " "))
-  (string-join args " "))
-
 (defun siera--command (command)
   "Wrapper for siera"
   (setq siera (executable-find "siera"))
